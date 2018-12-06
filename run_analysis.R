@@ -87,4 +87,4 @@ output <- selected_data %>%
         group_by(subject,Activity) %>%
         summarise_all(funs(mean))
 #Write output to a txt file
-write.table(output,row.name = FALSE,file = "tidy_data_set.txt")
+write.table(output,row.name = FALSE,file = "output.txt")
