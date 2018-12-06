@@ -42,50 +42,49 @@ rm(list=ls()[!ls() %in% "all_data"])
 only_mean_and_std <- grepl('-(mean|std)\\(', colnames(all_data))
 selector <- c(which(only_mean_and_std), ncol(all_data))
 selected_data <- all_data[selector]
-
+#Redefine data set directory
 data_files_directory <- "UCI HAR Dataset"
-
+#Get subject from train set
 subject_train_path <- paste(data_files_directory, "train", "subject_train.txt", sep = "/")
 subject_train <- read.table(subject_train_path, stringsAsFactors = FALSE)
-
+#Get subject from test set
 subject_test_path <- paste(data_files_directory, "test", "subject_test.txt", sep = "/")
 subject_test <- read.table(subject_test_path, stringsAsFactors = FALSE)
-
+#Combine training and test subjects
 subject <- rbind(subject_train, subject_test)
-
+#Combine subject with main and selected data sets
 all_data <- cbind(subject, all_data)
 selected_data <- cbind(subject, selected_data)
-
+#Add column names 
 colnames(all_data)[[1]] <- "subject"
 colnames(selected_data)[[1]] <- "subject"
-
+#Remove unnecessary files
 rm(list=ls()[!ls() %in% "selected_data"])
+#Get mean columns
 means <- grepl('mean\\(', colnames(selected_data))
-
+#Change column names
 for(i in 1:length(colnames(selected_data))) {
         if(means[i]) {
                 colnames(selected_data)[i] <- paste("Average", colnames(selected_data)[i], sep = " ")
         }
 }
-
 colnames(selected_data) <- gsub("-mean\\(\\)", "", colnames(selected_data))
-
+#Get std columns
 standart_deviations <- grepl('std\\(', colnames(selected_data))
-
+#Change column names
 for(i in 1:length(colnames(selected_data))) {
         if(standart_deviations[i]) {
                 colnames(selected_data)[i] <- paste("Standart Deviation", colnames(selected_data)[i], sep = " ")
         }
 }
-
 colnames(selected_data) <- gsub("-std\\(\\)", "", colnames(selected_data))
-
+#Change column names with Time and Frequency
 colnames(selected_data) <- gsub("(^.+) t", "\\1 Time ", colnames(selected_data))
 colnames(selected_data) <- gsub("(^.+) f", "\\1 Frequency", colnames(selected_data))
-
+#Average each measurement in terms of subject and activity
 library('dplyr')
 output <- selected_data %>%
         group_by(subject,Activity) %>%
         summarise_all(funs(mean))
-
+#Write output to a txt file
 write.table(output,row.name = FALSE,file = "tidy_data_set.txt")
