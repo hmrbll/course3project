@@ -82,3 +82,10 @@ colnames(selected_data) <- gsub("-std\\(\\)", "", colnames(selected_data))
 
 colnames(selected_data) <- gsub("(^.+) t", "\\1 Time ", colnames(selected_data))
 colnames(selected_data) <- gsub("(^.+) f", "\\1 Frequency", colnames(selected_data))
+
+library('dplyr')
+output <- selected_data %>%
+        group_by(subject,Activity) %>%
+        summarise_all(funs(mean))
+
+write.table(output,row.name = FALSE,file = "tidy_data_set.txt")
